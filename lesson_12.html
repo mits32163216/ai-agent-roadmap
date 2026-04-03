@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>レッスン12｜あなたのAIエージェント設計図 — 未来への一歩</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Hiragino Kaku Gothic ProN', 'Hiragino Sans', 'Noto Sans JP', sans-serif; background: #f5f7fa; color: #1a1a2e; line-height: 1.7; }
+
+  .lesson-banner {
+    background: linear-gradient(135deg, #7c2d12 0%, #9a3412 50%, #b45309 100%);
+    color: white; padding: 24px 28px; position: relative; overflow: hidden;
+  }
+  .lesson-banner::before {
+    content: ''; position: absolute; top: -40px; right: -40px;
+    width: 180px; height: 180px; border-radius: 50%;
+    background: rgba(255,255,255,0.05);
+  }
+  .group-label {
+    display: inline-block; background: rgba(255,255,255,0.15);
+    color: rgba(255,255,255,0.9); font-size: 11px; font-weight: 700;
+    letter-spacing: 0.06em; padding: 4px 12px; border-radius: 20px;
+    margin-bottom: 10px; text-transform: uppercase;
+  }
+  .lesson-num { font-size: 12px; color: rgba(255,255,255,0.6); margin-bottom: 4px; }
+  .lesson-title { font-size: 20px; font-weight: 700; line-height: 1.4; margin-bottom: 8px; }
+  .lesson-sub { font-size: 13px; color: rgba(255,255,255,0.7); }
+  .progress-bar-wrap { margin-top: 16px; }
+  .progress-label { font-size: 11px; color: rgba(255,255,255,0.5); margin-bottom: 5px; }
+  .progress-bar { background: rgba(255,255,255,0.15); border-radius: 4px; height: 5px; }
+  .progress-fill { background: #b45309; height: 5px; border-radius: 4px; transition: width 0.4s; }
+
+  .container { max-width: 680px; margin: 0 auto; padding: 24px 16px 60px; }
+
+  .intro-card {
+    background: white; border-radius: 12px; padding: 20px 22px;
+    margin-bottom: 20px; border-left: 4px solid #b45309;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+  }
+  .intro-card p { font-size: 14px; color: #444; }
+  .intro-card strong { color: #b45309; }
+
+  .video-card {
+    background: white; border-radius: 12px; padding: 20px 22px;
+    margin-bottom: 16px; box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+  }
+  .video-card-header {
+    display: flex; align-items: center; gap: 10px; margin-bottom: 14px;
+  }
+  .video-icon {
+    width: 36px; height: 36px; background: #b45309; border-radius: 8px;
+    display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+  }
+  .video-icon svg { fill: white; width: 16px; height: 16px; }
+  .video-meta { flex: 1; }
+  .video-channel { font-size: 11px; color: #888; margin-bottom: 2px; }
+  .video-name { font-size: 14px; font-weight: 700; color: #1a1a2e; }
+  .time-badge {
+    display: inline-flex; align-items: center; gap: 4px;
+    background: #f0f4ff; color: #b45309; font-size: 11px; font-weight: 600;
+    padding: 4px 10px; border-radius: 20px; margin-bottom: 12px;
+  }
+  .time-badge::before { content: '⏱'; }
+  .watch-range {
+    background: #fff8e1; border: 1px solid #ffd54f; border-radius: 8px;
+    padding: 10px 14px; margin-bottom: 14px;
+  }
+  .watch-range-label { font-size: 11px; color: #f57f17; font-weight: 700; margin-bottom: 3px; }
+  .watch-range-time { font-size: 16px; font-weight: 800; color: #e65100; font-family: 'Courier New', monospace; }
+  .watch-range-note { font-size: 12px; color: #795548; margin-top: 4px; }
+  .watch-btn {
+    display: block; width: 100%; background: linear-gradient(135deg, #b45309, #7c2d12);
+    color: white; text-align: center; padding: 14px; border-radius: 10px;
+    font-size: 15px; font-weight: 700; text-decoration: none;
+    transition: all 0.2s; border: none; cursor: pointer;
+  }
+  .watch-btn:hover { transform: translateY(-1px); box-shadow: 0 4px 14px rgba(180,83,9,0.4); }
+
+  .bridge-banner {
+    background: linear-gradient(135deg, #f0fdf4 0%, #dbeafe 100%);
+    border-left: 4px solid #b45309;
+    border-radius: 12px; padding: 18px 20px; margin-bottom: 20px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+  }
+  .bridge-banner-label { font-size: 12px; font-weight: 700; color: #b45309; margin-bottom: 6px; }
+  .bridge-banner-text { font-size: 13px; color: #666; line-height: 1.6; }
+
+  .jump-notice {
+    background: #fef3c7; border-left: 4px solid #f59e0b;
+    border-radius: 8px; padding: 12px 14px; margin-bottom: 16px;
+    font-size: 12px; color: #92400e; font-weight: 600;
+  }
+
+  .claude-md-badge {
+    background: linear-gradient(135deg, #e0e7ff 0%, #f3e8ff 100%);
+    border-left: 4px solid #b45309;
+    border-radius: 12px; padding: 18px 20px; margin-bottom: 20px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+  }
+  .claude-md-badge-title { font-size: 13px; font-weight: 700; color: #b45309; margin-bottom: 8px; }
+  .claude-md-badge-text { font-size: 13px; color: #666; line-height: 1.6; }
+
+  .checklist-section {
+    background: white; border-radius: 12px; padding: 20px 22px;
+    margin-bottom: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+  }
+  .checklist-title {
+    font-size: 14px; font-weight: 700; color: #1a1a2e; margin-bottom: 14px;
+    padding-bottom: 10px; border-bottom: 2px solid #f3f4f6;
+  }
+  .check-item {
+    display: flex; align-items: flex-start; gap: 10px; margin-bottom: 10px;
+    cursor: pointer; padding: 8px; border-radius: 8px; transition: background 0.15s;
+  }
+  .check-item:hover { background: #fef3c7; }
+  .check-item input[type="checkbox"] { display: none; }
+  .check-box {
+    width: 22px; height: 22px; border: 2px solid #d0d5e8; border-radius: 6px;
+    flex-shrink: 0; display: flex; align-items: center; justify-content: center;
+    transition: all 0.2s; margin-top: 1px;
+  }
+  .check-item.checked .check-box {
+    background: #b45309; border-color: #b45309;
+  }
+  .check-item.checked .check-box::after { content: '✓'; color: white; font-size: 13px; font-weight: 700; }
+  .check-label { font-size: 14px; color: #444; line-height: 1.5; }
+  .check-item.checked .check-label { color: #888; text-decoration: line-through; }
+
+  .complete-banner {
+    display: none; background: linear-gradient(135deg, #b45309, #92400e);
+    color: white; text-align: center; padding: 24px; border-radius: 12px;
+    font-size: 20px; font-weight: 700; margin-bottom: 16px;
+  }
+  .complete-banner.show { display: block; }
+
+  .completion-message {
+    background: white; border-radius: 12px; padding: 20px 22px;
+    margin-bottom: 16px; box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+    text-align: center;
+  }
+  .completion-message p { font-size: 14px; color: #666; line-height: 1.6; }
+
+  .next-btn {
+    display: block; background: white; color: #b45309; text-align: center;
+    padding: 14px; border-radius: 12px; font-size: 14px; font-weight: 700;
+    border: 2px solid #b45309; text-decoration: none; transition: all 0.2s;
+  }
+  .next-btn:hover { background: #b45309; color: white; }
+
+  .prev-btn {
+    display: block; background: white; color: #b45309; text-align: center;
+    padding: 14px; border-radius: 12px; font-size: 14px; font-weight: 700;
+    border: 2px solid #b45309; text-decoration: none; transition: all 0.2s;
+  }
+  .prev-btn:hover { background: #b45309; color: white; }
+
+  .nav-row {
+    display: flex; gap: 12px; margin-top: 16px;
+  }
+  .prev-btn { flex: 1; }
+
+  .video-note {
+    background: #fef3c7; border-left: 4px solid #b45309;
+    border-radius: 8px; padding: 10px 14px; margin-top: 10px;
+    font-size: 12px; color: #555;
+  }
+</style>
+</head>
+<body>
+
+<div class="lesson-banner">
+  <div class="group-label">設計編</div>
+  <div class="lesson-num">レッスン 12 / 12</div>
+  <div class="lesson-title">あなたのAIエージェント設計図 — 未来への一歩</div>
+  <div class="lesson-sub">タイピスト→バイブコーディング→エージェンティックエンジニアリング。あなたは今どこにいるか</div>
+  <div class="progress-bar-wrap">
+    <div class="progress-label">講座全体の進捗</div>
+    <div class="progress-bar"><div class="progress-fill" id="globalProgress" style="width:0%"></div></div>
+  </div>
+</div>
+
+<div class="container">
+
+  <!-- 動画カード 1 -->
+  <div class="video-card">
+    <div class="video-card-header">
+      <div class="video-icon">
+        <svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+      </div>
+      <div class="video-meta">
+        <div class="video-channel">松田先生（AI研究者）</div>
+        <div class="video-name">Karpathyが語るエージェント時代の3段階進化論</div>
+      </div>
+    </div>
+    <div class="time-badge">視聴時間：約3.5分</div>
+    <div class="watch-range">
+      <div class="watch-range-label">📍 この区間を再生してください</div>
+      <div class="watch-range-time">01:05 〜 04:22</div>
+      <div class="watch-range-note">タイピスト→バイブコーディング→エージェンティックエンジニアリングの3段階進化論。あなたの立ち位置を確認します</div>
+    </div>
+    <a class="watch-btn" href="https://www.youtube.com/watch?v=4iaZUCBlNOw" target="_blank" rel="noopener">
+      ▶ YouTubeで視聴する
+    </a>
+  </div>
+
+  <!-- 動画カード 2 -->
+  <div class="video-card">
+    <div class="video-card-header">
+      <div class="video-icon">
+        <svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+      </div>
+      <div class="video-meta">
+        <div class="video-channel">松田先生（AI研究者）</div>
+        <div class="video-name">Karpathyが語るエージェント時代の3段階進化論（続き）</div>
+      </div>
+    </div>
+    <div class="time-badge">視聴時間：約1分</div>
+    <div class="jump-notice">⏩ 同じ動画の別の場所に進みます。14:10 から再生してください</div>
+    <div class="watch-range">
+      <div class="watch-range-label">📍 この区間を再生してください</div>
+      <div class="watch-range-time">14:10 〜 15:13</div>
+      <div class="watch-range-note">04:22～14:10はスキップ：ratchetループの技術的詳細で、このレッスンの目的とは外れます</div>
+    </div>
+    <a class="watch-btn" href="https://www.youtube.com/watch?v=4iaZUCBlNOw&t=850" target="_blank" rel="noopener">
+      ▶ YouTubeで視聴する
+    </a>
+    <div class="video-note">「個人がR&Dラボを持つ時代」。講座の締めくくりとして、あなたの未来像として見てください</div>
+  </div>
+
+  <!-- チェックリスト -->
+  <div class="checklist-section">
+    <div class="checklist-title">✅ このレッスンのチェックリスト</div>
+
+    <label class="check-item" id="ci-12-1">
+      <input type="checkbox">
+      <div class="check-box"></div>
+      <span class="check-label">タイピスト→バイブコーディング→エージェンティックエンジニアリングの転換を説明できる</span>
+    </label>
+    <label class="check-item" id="ci-12-2">
+      <input type="checkbox">
+      <div class="check-box"></div>
+      <span class="check-label">「オペレーターからアーキテクトへ」の意味を自分の言葉で言える</span>
+    </label>
+    <label class="check-item" id="ci-12-3">
+      <input type="checkbox">
+      <div class="check-box"></div>
+      <span class="check-label">今日から始める最初のアクションを1つ決められた</span>
+    </label>
+    <label class="check-item" id="ci-12-4">
+      <input type="checkbox">
+      <div class="check-box"></div>
+      <span class="check-label">講座全体を通じて学んだことを3つ挙げられる</span>
+    </label>
+  </div>
+
+  <!-- 完走バナー -->
+  <div class="complete-banner" id="completeBanner">🎉 全12レッスン完了！</div>
+
+  <!-- 完走メッセージ -->
+  <div class="completion-message" id="completionMsg" style="display:none;">
+    <p>AIエージェントを使ってみたいという気持ちが芽生えましたか？今日から小さな1タスクを任せてみましょう。</p>
+  </div>
+
+  <!-- 完了ボタン -->
+  <button class="complete-btn" id="completeBtn" onclick="markComplete()" style="display:none;">
+    全レッスン完了を確定する
+  </button>
+
+  <!-- ナビゲーション -->
+  <div class="nav-row">
+    <a class="prev-btn" href="lesson_11.html">← 前へ</a>
+  </div>
+
+</div>
+
+<script>
+const LESSON = 12;
+const TOTAL = 12;
+const KEY = 'ai-agent-lesson-' + LESSON + '-complete';
+
+function updateProgress() {
+  let done = 0;
+  for (let i = 1; i <= TOTAL; i++) {
+    if (localStorage.getItem('ai-agent-lesson-' + i + '-complete') === 'true') done++;
+  }
+  const pct = Math.round((done / TOTAL) * 100);
+  document.getElementById('globalProgress').style.width = pct + '%';
+}
+
+function markComplete() {
+  localStorage.setItem(KEY, 'true');
+  const btn = document.getElementById('completeBtn');
+  btn.style.display = 'none';
+  document.getElementById('completeBanner').style.display = 'block';
+  document.getElementById('completionMsg').style.display = 'block';
+  updateProgress();
+}
+
+document.querySelectorAll('.check-item').forEach(function(item) {
+  item.addEventListener('click', function() {
+    this.classList.toggle('checked');
+  });
+});
+
+if (localStorage.getItem(KEY) === 'true') {
+  document.getElementById('completeBtn').style.display = 'none';
+  document.getElementById('completeBanner').style.display = 'block';
+  document.getElementById('completionMsg').style.display = 'block';
+} else {
+  document.getElementById('completeBtn').style.display = 'block';
+  document.getElementById('completeBanner').style.display = 'none';
+  document.getElementById('completionMsg').style.display = 'none';
+}
+updateProgress();
+</script>
+</body>
+</html>

@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>レッスン6｜外部ツール連携 — MCPとスキルでClaudeを拡張する</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Hiragino Kaku Gothic ProN', 'Hiragino Sans', 'Noto Sans JP', sans-serif; background: #f5f7fa; color: #1a1a2e; line-height: 1.7; }
+
+  .lesson-banner {
+    background: linear-gradient(135deg, #047857 0%, #059669 50%, #10b981 100%);
+    color: white; padding: 24px 28px; position: relative; overflow: hidden;
+  }
+  .lesson-banner::before {
+    content: ''; position: absolute; top: -40px; right: -40px;
+    width: 180px; height: 180px; border-radius: 50%;
+    background: rgba(255,255,255,0.05);
+  }
+  .group-label {
+    display: inline-block; background: rgba(255,255,255,0.15);
+    color: rgba(255,255,255,0.9); font-size: 11px; font-weight: 700;
+    letter-spacing: 0.06em; padding: 4px 12px; border-radius: 20px;
+    margin-bottom: 10px; text-transform: uppercase;
+  }
+  .lesson-num { font-size: 12px; color: rgba(255,255,255,0.6); margin-bottom: 4px; }
+  .lesson-title { font-size: 20px; font-weight: 700; line-height: 1.4; margin-bottom: 8px; }
+  .lesson-sub { font-size: 13px; color: rgba(255,255,255,0.7); }
+  .progress-bar-wrap { margin-top: 16px; }
+  .progress-label { font-size: 11px; color: rgba(255,255,255,0.5); margin-bottom: 5px; }
+  .progress-bar { background: rgba(255,255,255,0.15); border-radius: 4px; height: 5px; }
+  .progress-fill { background: #059669; height: 5px; border-radius: 4px; transition: width 0.4s; }
+
+  .container { max-width: 680px; margin: 0 auto; padding: 24px 16px 60px; }
+
+  .intro-card {
+    background: white; border-radius: 12px; padding: 20px 22px;
+    margin-bottom: 20px; border-left: 4px solid #059669;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+  }
+  .intro-card p { font-size: 14px; color: #444; }
+  .intro-card strong { color: #059669; }
+
+  .video-card {
+    background: white; border-radius: 12px; padding: 20px 22px;
+    margin-bottom: 16px; box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+  }
+  .video-card-header {
+    display: flex; align-items: center; gap: 10px; margin-bottom: 14px;
+  }
+  .video-icon {
+    width: 36px; height: 36px; background: #059669; border-radius: 8px;
+    display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+  }
+  .video-icon svg { fill: white; width: 16px; height: 16px; }
+  .video-meta { flex: 1; }
+  .video-channel { font-size: 11px; color: #888; margin-bottom: 2px; }
+  .video-name { font-size: 14px; font-weight: 700; color: #1a1a2e; }
+  .time-badge {
+    display: inline-flex; align-items: center; gap: 4px;
+    background: #f0f4ff; color: #059669; font-size: 11px; font-weight: 600;
+    padding: 4px 10px; border-radius: 20px; margin-bottom: 12px;
+  }
+  .time-badge::before { content: '⏱'; }
+  .watch-range {
+    background: #fff8e1; border: 1px solid #ffd54f; border-radius: 8px;
+    padding: 10px 14px; margin-bottom: 14px;
+  }
+  .watch-range-label { font-size: 11px; color: #f57f17; font-weight: 700; margin-bottom: 3px; }
+  .watch-range-time { font-size: 16px; font-weight: 800; color: #e65100; font-family: 'Courier New', monospace; }
+  .watch-range-note { font-size: 12px; color: #795548; margin-top: 4px; }
+  .watch-btn {
+    display: block; width: 100%; background: linear-gradient(135deg, #059669, #047857);
+    color: white; text-align: center; padding: 14px; border-radius: 10px;
+    font-size: 15px; font-weight: 700; text-decoration: none;
+    transition: all 0.2s; border: none; cursor: pointer;
+  }
+  .watch-btn:hover { transform: translateY(-1px); box-shadow: 0 4px 14px rgba(5,150,105,0.4); }
+
+  .bridge-banner {
+    background: linear-gradient(135deg, #f0fdf4 0%, #dbeafe 100%);
+    border-left: 4px solid #059669;
+    border-radius: 12px; padding: 18px 20px; margin-bottom: 20px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+  }
+  .bridge-banner-label { font-size: 12px; font-weight: 700; color: #059669; margin-bottom: 6px; }
+  .bridge-banner-text { font-size: 13px; color: #666; line-height: 1.6; }
+
+  .jump-notice {
+    background: #fef3c7; border-left: 4px solid #f59e0b;
+    border-radius: 8px; padding: 12px 14px; margin-bottom: 16px;
+    font-size: 12px; color: #92400e; font-weight: 600;
+  }
+
+  .claude-md-badge {
+    background: linear-gradient(135deg, #e0e7ff 0%, #f3e8ff 100%);
+    border-left: 4px solid #6366f1;
+    border-radius: 12px; padding: 18px 20px; margin-bottom: 20px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+  }
+  .claude-md-badge-title { font-size: 13px; font-weight: 700; color: #6366f1; margin-bottom: 8px; }
+  .claude-md-badge-text { font-size: 13px; color: #666; line-height: 1.6; }
+
+  .checklist-section {
+    background: white; border-radius: 12px; padding: 20px 22px;
+    margin-bottom: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+  }
+  .checklist-title {
+    font-size: 14px; font-weight: 700; color: #1a1a2e; margin-bottom: 14px;
+    padding-bottom: 10px; border-bottom: 2px solid #f0fdf4;
+  }
+  .check-item {
+    display: flex; align-items: flex-start; gap: 10px; margin-bottom: 10px;
+    cursor: pointer; padding: 8px; border-radius: 8px; transition: background 0.15s;
+  }
+  .check-item:hover { background: #f0fdf4; }
+  .check-item input[type="checkbox"] { display: none; }
+  .check-box {
+    width: 22px; height: 22px; border: 2px solid #d0d5e8; border-radius: 6px;
+    flex-shrink: 0; display: flex; align-items: center; justify-content: center;
+    transition: all 0.2s; margin-top: 1px;
+  }
+  .check-item.checked .check-box {
+    background: #059669; border-color: #059669;
+  }
+  .check-item.checked .check-box::after { content: '✓'; color: white; font-size: 13px; font-weight: 700; }
+  .check-label { font-size: 14px; color: #444; line-height: 1.5; }
+  .check-item.checked .check-label { color: #888; text-decoration: line-through; }
+
+  .complete-btn {
+    display: block; width: 100%; background: linear-gradient(135deg, #059669, #047857);
+    color: white; text-align: center; padding: 16px; border-radius: 12px;
+    font-size: 16px; font-weight: 700; border: none; cursor: pointer;
+    margin-bottom: 16px; transition: all 0.2s;
+  }
+  .complete-btn:hover { transform: translateY(-1px); box-shadow: 0 5px 18px rgba(5,150,105,0.4); }
+  .complete-btn.done { background: #2dc653; }
+
+  .next-btn {
+    display: block; background: white; color: #059669; text-align: center;
+    padding: 14px; border-radius: 12px; font-size: 14px; font-weight: 700;
+    border: 2px solid #059669; text-decoration: none; transition: all 0.2s;
+  }
+  .next-btn:hover { background: #059669; color: white; }
+
+  .nav-row {
+    display: flex; gap: 12px; margin-top: 16px;
+  }
+  .prev-btn, .next-btn { flex: 1; }
+  .prev-btn {
+    background: white; color: #059669; text-align: center;
+    padding: 14px; border-radius: 12px; font-size: 14px; font-weight: 700;
+    border: 2px solid #059669; text-decoration: none; transition: all 0.2s;
+  }
+  .prev-btn:hover { background: #059669; color: white; }
+
+  .complete-banner {
+    display: none; background: #2dc653;
+    color: white; text-align: center; padding: 16px; border-radius: 12px;
+    font-size: 15px; font-weight: 700; margin-bottom: 16px;
+  }
+  .complete-banner.show { display: block; }
+</style>
+</head>
+<body>
+
+<div class="lesson-banner">
+  <div class="group-label">体験編</div>
+  <div class="lesson-num">レッスン 6 / 12</div>
+  <div class="lesson-title">外部ツール連携 — MCPとスキルでClaudeを拡張する</div>
+  <div class="lesson-sub">Google・Gmail・Calendar…ClaudeをあなたのPCの司令塔にする</div>
+  <div class="progress-bar-wrap">
+    <div class="progress-label">講座全体の進捗</div>
+    <div class="progress-bar"><div class="progress-fill" id="globalProgress" style="width:0%"></div></div>
+  </div>
+</div>
+
+<div class="container">
+
+  <div class="intro-card">
+    <p><strong>MCPとは、AIと外部ツールをつなぐ接続口です。</strong>MCPを設定することで、Claudeが直接Gmailを読んだり、Googleカレンダーに予定を作ったり、タスク管理ツールを操作できるようになります。この動画では、実際にClaudeにGoogle系ツールを繋いだ実例を見ます。</p>
+  </div>
+
+  <!-- 動画カード -->
+  <div class="video-card">
+    <div class="video-card-header">
+      <div class="video-icon">
+        <svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+      </div>
+      <div class="video-meta">
+        <div class="video-channel">POST HUMAN / Authentic AI</div>
+        <div class="video-name">ClaudeとGoogleツールを連携して朝のルーティンを全自動化した話</div>
+      </div>
+    </div>
+    <div class="time-badge">視聴時間：約3分</div>
+    <div class="watch-range">
+      <div class="watch-range-label">📍 この区間を再生してください</div>
+      <div class="watch-range-time">01:23 〜 04:30</div>
+      <div class="watch-range-note">00:00～01:23はスキップ：自己紹介・ツール3選の概要。04:30以降はスキップ：ChatGPT/GrokとMaison AI宣伝色が強い</div>
+    </div>
+    <a class="watch-btn" href="https://www.youtube.com/watch?v=p2MFSST-Tv4" target="_blank" rel="noopener">
+      ▶ YouTubeで視聴する
+    </a>
+  </div>
+
+  <!-- チェックリスト -->
+  <div class="checklist-section">
+    <div class="checklist-title">✅ このレッスンのチェックリスト</div>
+
+    <label class="check-item" id="ci-6-1">
+      <input type="checkbox">
+      <div class="check-box"></div>
+      <span class="check-label">MCPの基本概念（AIと外部ツールの接続口）を1文で説明できる</span>
+    </label>
+    <label class="check-item" id="ci-6-2">
+      <input type="checkbox">
+      <div class="check-box"></div>
+      <span class="check-label">ClaudeにGoogleツールを繋ぐと何ができるか具体的に説明できる</span>
+    </label>
+    <label class="check-item" id="ci-6-3">
+      <input type="checkbox">
+      <div class="check-box"></div>
+      <span class="check-label">自分のビジネスで「Claudeに繋いでみたいツール」を1つ挙げられる</span>
+    </label>
+    <label class="check-item" id="ci-6-4">
+      <input type="checkbox">
+      <div class="check-box"></div>
+      <span class="check-label">スキルファイルが「繰り返し仕事の設計図」であることを理解した</span>
+    </label>
+  </div>
+
+  <!-- 完了ボタン -->
+  <div class="complete-banner" id="completeBanner">🎉 レッスン6 完了！</div>
+  <button class="complete-btn" id="completeBtn" onclick="markComplete()">
+    レッスン6を完了にする
+  </button>
+
+  <!-- ナビゲーション -->
+  <div class="nav-row">
+    <a class="prev-btn" href="lesson_05.html">← 前へ</a>
+    <a class="next-btn" href="lesson_07.html">次へ →</a>
+  </div>
+
+</div>
+
+<script>
+const LESSON = 6;
+const TOTAL = 12;
+const KEY = 'ai-agent-lesson-' + LESSON + '-complete';
+
+function updateProgress() {
+  let done = 0;
+  for (let i = 1; i <= TOTAL; i++) {
+    if (localStorage.getItem('ai-agent-lesson-' + i + '-complete') === 'true') done++;
+  }
+  const pct = Math.round((done / TOTAL) * 100);
+  document.getElementById('globalProgress').style.width = pct + '%';
+}
+
+function markComplete() {
+  localStorage.setItem(KEY, 'true');
+  const btn = document.getElementById('completeBtn');
+  btn.classList.add('done');
+  btn.textContent = '✓ 完了済み';
+  document.getElementById('completeBanner').classList.add('show');
+  updateProgress();
+}
+
+document.querySelectorAll('.check-item').forEach(function(item) {
+  item.addEventListener('click', function() {
+    this.classList.toggle('checked');
+  });
+});
+
+if (localStorage.getItem(KEY) === 'true') {
+  const btn = document.getElementById('completeBtn');
+  btn.classList.add('done');
+  btn.textContent = '✓ 完了済み';
+  document.getElementById('completeBanner').classList.add('show');
+}
+updateProgress();
+</script>
+</body>
+</html>

@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>レッスン5｜はじめてのサブエージェント</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Hiragino Kaku Gothic ProN', 'Hiragino Sans', 'Noto Sans JP', sans-serif; background: #f5f7fa; color: #1a1a2e; line-height: 1.7; }
+  .lesson-banner { background: linear-gradient(135deg, #dc2626 0%, #b91c1c 50%, #991b1b 100%); color: white; padding: 24px 28px; position: relative; overflow: hidden; }
+  .lesson-banner::before { content: ''; position: absolute; top: -40px; right: -40px; width: 180px; height: 180px; border-radius: 50%; background: rgba(255,255,255,0.05); }
+  .group-label { display: inline-block; background: rgba(255,255,255,0.2); color: white; font-size: 11px; font-weight: 700; letter-spacing: 0.06em; padding: 4px 12px; border-radius: 20px; margin-bottom: 10px; }
+  .lesson-num { font-size: 12px; color: rgba(255,255,255,0.6); margin-bottom: 4px; }
+  .lesson-title { font-size: 20px; font-weight: 700; line-height: 1.4; margin-bottom: 8px; }
+  .lesson-sub { font-size: 13px; color: rgba(255,255,255,0.8); }
+  .progress-bar-wrap { margin-top: 16px; }
+  .progress-label { font-size: 11px; color: rgba(255,255,255,0.5); margin-bottom: 5px; }
+  .progress-bar { background: rgba(255,255,255,0.2); border-radius: 4px; height: 5px; }
+  .progress-fill { background: #fbbf24; height: 5px; border-radius: 4px; transition: width 0.4s; }
+  .container { max-width: 680px; margin: 0 auto; padding: 24px 16px 60px; }
+  .intro-card { background: white; border-radius: 12px; padding: 20px 22px; margin-bottom: 20px; border-left: 4px solid #dc2626; box-shadow: 0 2px 8px rgba(0,0,0,0.06); }
+  .intro-card p { font-size: 14px; color: #444; }
+  .intro-card strong { color: #dc2626; }
+  /* CLAUDE.md深化バッジ */
+  .claude-md-badge {
+    background: linear-gradient(135deg, #1a1a2e, #0f3460);
+    color: white; border-radius: 10px; padding: 14px 18px; margin-bottom: 20px;
+    font-size: 13px;
+  }
+  .claude-md-badge-title { font-weight: 700; font-size: 12px; color: #fbbf24; letter-spacing: 0.08em; margin-bottom: 6px; }
+  .claude-md-badge p { color: rgba(255,255,255,0.85); }
+  .video-card { background: white; border-radius: 12px; padding: 20px 22px; margin-bottom: 16px; box-shadow: 0 2px 8px rgba(0,0,0,0.06); }
+  .video-card-header { display: flex; align-items: center; gap: 10px; margin-bottom: 14px; }
+  .video-icon { width: 36px; height: 36px; background: #dc2626; border-radius: 8px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+  .video-icon svg { fill: white; width: 16px; height: 16px; }
+  .video-meta { flex: 1; }
+  .video-channel { font-size: 11px; color: #888; margin-bottom: 2px; }
+  .video-name { font-size: 14px; font-weight: 700; color: #1a1a2e; }
+  .time-badge { display: inline-flex; align-items: center; gap: 4px; background: #fef2f2; color: #dc2626; font-size: 11px; font-weight: 600; padding: 4px 10px; border-radius: 20px; margin-bottom: 12px; }
+  .time-badge::before { content: '⏱'; }
+  .watch-range { background: #fff8e1; border: 1px solid #ffd54f; border-radius: 8px; padding: 10px 14px; margin-bottom: 14px; }
+  .watch-range-label { font-size: 11px; color: #f57f17; font-weight: 700; margin-bottom: 3px; }
+  .watch-range-time { font-size: 16px; font-weight: 800; color: #e65100; font-family: 'Courier New', monospace; }
+  .watch-range-note { font-size: 12px; color: #795548; margin-top: 4px; }
+  .skip-notice { background: #fce4ec; border: 1px solid #f48fb1; border-radius: 8px; padding: 10px 14px; margin-bottom: 14px; font-size: 12px; color: #880e4f; }
+  .skip-notice strong { font-weight: 700; }
+  .watch-btn { display: block; width: 100%; background: linear-gradient(135deg, #dc2626, #b91c1c); color: white; text-align: center; padding: 14px; border-radius: 10px; font-size: 15px; font-weight: 700; text-decoration: none; transition: all 0.2s; border: none; cursor: pointer; }
+  .watch-btn:hover { transform: translateY(-1px); box-shadow: 0 4px 14px rgba(220,38,38,0.4); }
+  .checklist-section { background: white; border-radius: 12px; padding: 20px 22px; margin-bottom: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.06); }
+  .checklist-title { font-size: 14px; font-weight: 700; color: #1a1a2e; margin-bottom: 14px; padding-bottom: 10px; border-bottom: 2px solid #fef2f2; }
+  .check-item { display: flex; align-items: flex-start; gap: 10px; margin-bottom: 10px; cursor: pointer; padding: 8px; border-radius: 8px; transition: background 0.15s; }
+  .check-item:hover { background: #fff5f5; }
+  .check-item input[type="checkbox"] { display: none; }
+  .check-box { width: 22px; height: 22px; border: 2px solid #d0d5e8; border-radius: 6px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; transition: all 0.2s; margin-top: 1px; }
+  .check-item.checked .check-box { background: #dc2626; border-color: #dc2626; }
+  .check-item.checked .check-box::after { content: '✓'; color: white; font-size: 13px; font-weight: 700; }
+  .check-label { font-size: 14px; color: #444; line-height: 1.5; }
+  .check-item.checked .check-label { color: #888; text-decoration: line-through; }
+  .complete-btn { display: block; width: 100%; background: linear-gradient(135deg, #dc2626, #b91c1c); color: white; text-align: center; padding: 16px; border-radius: 12px; font-size: 16px; font-weight: 700; border: none; cursor: pointer; margin-bottom: 16px; transition: all 0.2s; }
+  .complete-btn:hover { transform: translateY(-1px); box-shadow: 0 5px 18px rgba(220,38,38,0.4); }
+  .complete-btn.done { background: #2dc653; }
+  .nav-row { display: flex; gap: 10px; }
+  .back-btn { display: block; flex: 1; background: white; color: #888; text-align: center; padding: 14px; border-radius: 12px; font-size: 14px; font-weight: 700; border: 2px solid #e0e0e0; text-decoration: none; transition: all 0.2s; }
+  .back-btn:hover { border-color: #aaa; color: #444; }
+  .next-btn { display: block; flex: 2; background: white; color: #dc2626; text-align: center; padding: 14px; border-radius: 12px; font-size: 14px; font-weight: 700; border: 2px solid #dc2626; text-decoration: none; transition: all 0.2s; }
+  .next-btn:hover { background: #dc2626; color: white; }
+  .complete-banner { display: none; background: #2dc653; color: white; text-align: center; padding: 16px; border-radius: 12px; font-size: 15px; font-weight: 700; margin-bottom: 16px; }
+  .complete-banner.show { display: block; }
+</style>
+</head>
+<body>
+
+<div class="lesson-banner">
+  <div class="group-label">体験編</div>
+  <div class="lesson-num">レッスン 5 / 12</div>
+  <div class="lesson-title">はじめてのサブエージェント<br>— Claude Codeで仕事を任せる</div>
+  <div class="lesson-sub">CLAUDE.mdとは何か。なぜそこに書くのか。</div>
+  <div class="progress-bar-wrap">
+    <div class="progress-label">講座全体の進捗</div>
+    <div class="progress-bar"><div class="progress-fill" id="globalProgress" style="width:0%"></div></div>
+  </div>
+</div>
+
+<div class="container">
+
+  <div class="intro-card">
+    <p>いよいよ「1体のAIに仕事を任せる」体験です。<br>
+    <strong>サブエージェント</strong>・<strong>CLAUDE.md</strong>・<strong>/agentsコマンド</strong>の3つを理解することがこのレッスンのゴールです。</p>
+  </div>
+
+  <!-- ⭐ Phase 6 対処事項：CLAUDE.md深化の明示（L5→L7） -->
+  <div class="claude-md-badge">
+    <div class="claude-md-badge-title">📝 CLAUDE.md について（レッスン5・7で2段階学びます）</div>
+    <p>このレッスンでは「CLAUDE.mdとは何か・何のためにあるか」を学びます。<br>
+    レッスン7では、その先の「複数AIが協調するときのCLAUDE.md設計」に進みます。<br>
+    まずはレッスン5で「1体に任せる」感覚をつかんでください。</p>
+  </div>
+
+  <!-- 動画カード -->
+  <div class="video-card">
+    <div class="video-card-header">
+      <div class="video-icon">
+        <svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+      </div>
+      <div class="video-meta">
+        <div class="video-channel">IMURA</div>
+        <div class="video-name">サブエージェント完全解説｜CLAUDE.mdで仕事を設計する</div>
+      </div>
+    </div>
+    <div class="time-badge">視聴時間：約16分</div>
+    <div class="watch-range">
+      <div class="watch-range-label">📍 この区間を再生してください</div>
+      <div class="watch-range-time">00:57 〜 16:57</div>
+      <div class="watch-range-note">サブエージェント3レベル・CLAUDE.mdの役割・/agentsの実演。1体を動かす体験の核心です。</div>
+    </div>
+    <div class="skip-notice">
+      <strong>⏭ 00:00〜00:57はスキップ</strong>：イントロ＋「コンテキスト問題の雑談」です。学習内容は00:57から始まります。<br>
+      <strong>⏭ 16:57以降はスキップ</strong>：チャンネル登録コールのみです。
+    </div>
+    <a class="watch-btn" href="https://www.youtube.com/watch?v=bqqvPSTfIWE" target="_blank" rel="noopener">
+      ▶ YouTubeで視聴する（00:57から再生）
+    </a>
+  </div>
+
+  <!-- チェックリスト -->
+  <div class="checklist-section">
+    <div class="checklist-title">✅ このレッスンのチェックリスト</div>
+    <label class="check-item">
+      <input type="checkbox"><div class="check-box"></div>
+      <span class="check-label">Claude Codeでサブエージェントを起動する流れを理解した</span>
+    </label>
+    <label class="check-item">
+      <input type="checkbox"><div class="check-box"></div>
+      <span class="check-label">CLAUDE.mdの役割を説明できる</span>
+    </label>
+    <label class="check-item">
+      <input type="checkbox"><div class="check-box"></div>
+      <span class="check-label">スキル（SKILL.md）が何かを理解した</span>
+    </label>
+    <label class="check-item">
+      <input type="checkbox"><div class="check-box"></div>
+      <span class="check-label">1体のサブエージェントに仕事を任せるイメージが持てた</span>
+    </label>
+  </div>
+
+  <div class="complete-banner" id="completeBanner">🎉 レッスン5 完了！</div>
+  <button class="complete-btn" id="completeBtn" onclick="markComplete()">レッスン5を完了にする</button>
+  <div class="nav-row">
+    <a class="back-btn" href="lesson_04.html">← レッスン4</a>
+    <a class="next-btn" href="lesson_06.html">次へ → レッスン6 外部ツール連携</a>
+  </div>
+
+</div>
+
+<script>
+const LESSON = 5; const TOTAL = 12; const KEY = 'ai-agent-lesson-' + LESSON + '-complete';
+function updateProgress() {
+  let done = 0;
+  for (let i = 1; i <= TOTAL; i++) { if (localStorage.getItem('ai-agent-lesson-' + i + '-complete') === 'true') done++; }
+  document.getElementById('globalProgress').style.width = Math.round((done / TOTAL) * 100) + '%';
+}
+function markComplete() {
+  localStorage.setItem(KEY, 'true');
+  const btn = document.getElementById('completeBtn');
+  btn.classList.add('done'); btn.textContent = '✓ 完了済み';
+  document.getElementById('completeBanner').classList.add('show');
+  updateProgress();
+}
+document.querySelectorAll('.check-item').forEach(function(item) { item.addEventListener('click', function() { this.classList.toggle('checked'); }); });
+if (localStorage.getItem(KEY) === 'true') {
+  document.getElementById('completeBtn').classList.add('done'); document.getElementById('completeBtn').textContent = '✓ 完了済み';
+  document.getElementById('completeBanner').classList.add('show');
+}
+updateProgress();
+</script>
+</body>
+</html>

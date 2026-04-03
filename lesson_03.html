@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>レッスン3｜世界はどう動いているか</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Hiragino Kaku Gothic ProN', 'Hiragino Sans', 'Noto Sans JP', sans-serif; background: #f5f7fa; color: #1a1a2e; line-height: 1.7; }
+  .lesson-banner {
+    background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+    color: white; padding: 24px 28px; position: relative; overflow: hidden;
+  }
+  .lesson-banner::before { content: ''; position: absolute; top: -40px; right: -40px; width: 180px; height: 180px; border-radius: 50%; background: rgba(255,255,255,0.05); }
+  .group-label { display: inline-block; background: rgba(255,255,255,0.15); color: rgba(255,255,255,0.9); font-size: 11px; font-weight: 700; letter-spacing: 0.06em; padding: 4px 12px; border-radius: 20px; margin-bottom: 10px; }
+  .lesson-num { font-size: 12px; color: rgba(255,255,255,0.6); margin-bottom: 4px; }
+  .lesson-title { font-size: 20px; font-weight: 700; line-height: 1.4; margin-bottom: 8px; }
+  .lesson-sub { font-size: 13px; color: rgba(255,255,255,0.7); }
+  .progress-bar-wrap { margin-top: 16px; }
+  .progress-label { font-size: 11px; color: rgba(255,255,255,0.5); margin-bottom: 5px; }
+  .progress-bar { background: rgba(255,255,255,0.15); border-radius: 4px; height: 5px; }
+  .progress-fill { background: #e94560; height: 5px; border-radius: 4px; transition: width 0.4s; }
+  .container { max-width: 680px; margin: 0 auto; padding: 24px 16px 60px; }
+  .intro-card { background: white; border-radius: 12px; padding: 20px 22px; margin-bottom: 20px; border-left: 4px solid #7c3aed; box-shadow: 0 2px 8px rgba(0,0,0,0.06); }
+  .intro-card p { font-size: 14px; color: #444; }
+  .intro-card strong { color: #7c3aed; }
+  .section-label { font-size: 13px; font-weight: 700; color: #7c3aed; margin-bottom: 10px; display: flex; align-items: center; gap: 6px; }
+  .section-label::before { content: ''; display: inline-block; width: 4px; height: 16px; background: #7c3aed; border-radius: 2px; }
+  .video-card { background: white; border-radius: 12px; padding: 20px 22px; margin-bottom: 16px; box-shadow: 0 2px 8px rgba(0,0,0,0.06); }
+  .video-card-header { display: flex; align-items: center; gap: 10px; margin-bottom: 14px; }
+  .video-icon { width: 36px; height: 36px; background: #7c3aed; border-radius: 8px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+  .video-icon svg { fill: white; width: 16px; height: 16px; }
+  .video-meta { flex: 1; }
+  .video-channel { font-size: 11px; color: #888; margin-bottom: 2px; }
+  .video-name { font-size: 14px; font-weight: 700; color: #1a1a2e; }
+  .time-badge { display: inline-flex; align-items: center; gap: 4px; background: #f5f0ff; color: #7c3aed; font-size: 11px; font-weight: 600; padding: 4px 10px; border-radius: 20px; margin-bottom: 12px; }
+  .time-badge::before { content: '⏱'; }
+  .watch-range { background: #fff8e1; border: 1px solid #ffd54f; border-radius: 8px; padding: 10px 14px; margin-bottom: 14px; }
+  .watch-range-label { font-size: 11px; color: #f57f17; font-weight: 700; margin-bottom: 3px; }
+  .watch-range-time { font-size: 16px; font-weight: 800; color: #e65100; font-family: 'Courier New', monospace; }
+  .watch-range-note { font-size: 12px; color: #795548; margin-top: 4px; }
+  .jump-notice {
+    background: #e8f5e9; border: 1px solid #a5d6a7; border-radius: 8px;
+    padding: 12px 14px; margin-bottom: 14px;
+  }
+  .jump-notice-label { font-size: 11px; color: #2e7d32; font-weight: 700; margin-bottom: 4px; }
+  .jump-notice-time { font-size: 18px; font-weight: 800; color: #1b5e20; font-family: 'Courier New', monospace; }
+  .jump-notice-note { font-size: 12px; color: #388e3c; margin-top: 4px; }
+  .skip-notice { background: #fce4ec; border: 1px solid #f48fb1; border-radius: 8px; padding: 10px 14px; margin-bottom: 14px; font-size: 12px; color: #880e4f; }
+  .skip-notice strong { font-weight: 700; }
+  .watch-btn { display: block; width: 100%; background: linear-gradient(135deg, #7c3aed, #6d28d9); color: white; text-align: center; padding: 14px; border-radius: 10px; font-size: 15px; font-weight: 700; text-decoration: none; transition: all 0.2s; border: none; cursor: pointer; }
+  .watch-btn:hover { transform: translateY(-1px); box-shadow: 0 4px 14px rgba(124,58,237,0.4); }
+  .bridge-banner {
+    background: linear-gradient(135deg, #0f3460, #1a1a2e); color: white;
+    border-radius: 12px; padding: 18px 22px; margin-bottom: 20px;
+  }
+  .bridge-banner-label { font-size: 11px; color: rgba(255,255,255,0.6); font-weight: 700; letter-spacing: 0.1em; margin-bottom: 6px; }
+  .bridge-banner-text { font-size: 14px; color: rgba(255,255,255,0.9); line-height: 1.6; }
+  .checklist-section { background: white; border-radius: 12px; padding: 20px 22px; margin-bottom: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.06); }
+  .checklist-title { font-size: 14px; font-weight: 700; color: #1a1a2e; margin-bottom: 14px; padding-bottom: 10px; border-bottom: 2px solid #f5f0ff; }
+  .check-item { display: flex; align-items: flex-start; gap: 10px; margin-bottom: 10px; cursor: pointer; padding: 8px; border-radius: 8px; transition: background 0.15s; }
+  .check-item:hover { background: #faf8ff; }
+  .check-item input[type="checkbox"] { display: none; }
+  .check-box { width: 22px; height: 22px; border: 2px solid #d0d5e8; border-radius: 6px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; transition: all 0.2s; margin-top: 1px; }
+  .check-item.checked .check-box { background: #7c3aed; border-color: #7c3aed; }
+  .check-item.checked .check-box::after { content: '✓'; color: white; font-size: 13px; font-weight: 700; }
+  .check-label { font-size: 14px; color: #444; line-height: 1.5; }
+  .check-item.checked .check-label { color: #888; text-decoration: line-through; }
+  .complete-btn { display: block; width: 100%; background: linear-gradient(135deg, #7c3aed, #6d28d9); color: white; text-align: center; padding: 16px; border-radius: 12px; font-size: 16px; font-weight: 700; border: none; cursor: pointer; margin-bottom: 16px; transition: all 0.2s; }
+  .complete-btn:hover { transform: translateY(-1px); box-shadow: 0 5px 18px rgba(124,58,237,0.4); }
+  .complete-btn.done { background: #2dc653; }
+  .nav-row { display: flex; gap: 10px; }
+  .back-btn { display: block; flex: 1; background: white; color: #888; text-align: center; padding: 14px; border-radius: 12px; font-size: 14px; font-weight: 700; border: 2px solid #e0e0e0; text-decoration: none; transition: all 0.2s; }
+  .back-btn:hover { border-color: #aaa; color: #444; }
+  .next-btn { display: block; flex: 2; background: white; color: #7c3aed; text-align: center; padding: 14px; border-radius: 12px; font-size: 14px; font-weight: 700; border: 2px solid #7c3aed; text-decoration: none; transition: all 0.2s; }
+  .next-btn:hover { background: #7c3aed; color: white; }
+  .complete-banner { display: none; background: #2dc653; color: white; text-align: center; padding: 16px; border-radius: 12px; font-size: 15px; font-weight: 700; margin-bottom: 16px; }
+  .complete-banner.show { display: block; }
+</style>
+</head>
+<body>
+
+<div class="lesson-banner">
+  <div class="group-label">概念編</div>
+  <div class="lesson-num">レッスン 3 / 12</div>
+  <div class="lesson-title">世界はどう動いているか<br>— Google・Anthropic・ソフトバンクの戦略</div>
+  <div class="lesson-sub">日本のAIエージェント活用率は世界の0.02%</div>
+  <div class="progress-bar-wrap">
+    <div class="progress-label">講座全体の進捗</div>
+    <div class="progress-bar"><div class="progress-fill" id="globalProgress" style="width:0%"></div></div>
+  </div>
+</div>
+
+<div class="container">
+
+  <!-- ⭐ Phase 6 対処事項：L3冒頭テキスト -->
+  <div class="intro-card">
+    <p>このレッスンは「AIエージェントの定義を教える」ためではありません。<br>
+    <strong>世界地図を俯瞰する</strong>ために見ます。「今どこにいるか」「誰が何をしているか」を把握することで、次のレッスン（道具選び）の判断軸が生まれます。</p>
+  </div>
+
+  <!-- 動画①（前半） -->
+  <div class="section-label">動画① 前半：生成AIとエージェントの違い</div>
+  <div class="video-card">
+    <div class="video-card-header">
+      <div class="video-icon">
+        <svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+      </div>
+      <div class="video-meta">
+        <div class="video-channel">エルアボ</div>
+        <div class="video-name">AIエージェント完全解説｜生成AIとの違いと逆算タスク思考</div>
+      </div>
+    </div>
+    <div class="time-badge">視聴時間：約4.5分</div>
+    <div class="watch-range">
+      <div class="watch-range-label">📍 この区間を再生してください（前半）</div>
+      <div class="watch-range-time">02:12 〜 06:33</div>
+      <div class="watch-range-note">生成AIとエージェントの定義の違い・逆算タスク思考の説明が明快です。</div>
+    </div>
+    <div class="skip-notice">
+      <strong>⏭ 00:00〜02:12はスキップ</strong>：ライブ配信のOP・チャンネル紹介です。<br>
+      <strong>⏭ 06:33〜25:56もスキップ</strong>：Antigravity＋Obsidian操作デモで冗長です（次の区間は25:57から）。
+    </div>
+    <a class="watch-btn" href="https://www.youtube.com/watch?v=_vMi9b0XxJw" target="_blank" rel="noopener">
+      ▶ YouTubeで視聴する（02:12から再生）
+    </a>
+  </div>
+
+  <!-- ⭐ Phase 6 対処事項：L3②ジャンプ案内テキスト -->
+  <div class="section-label">動画① 後半：日本のAIエージェント活用の現実</div>
+  <div class="video-card">
+    <div class="video-card-header">
+      <div class="video-icon">
+        <svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+      </div>
+      <div class="video-meta">
+        <div class="video-channel">エルアボ（同じ動画の続き）</div>
+        <div class="video-name">AIエージェント完全解説｜生成AIとの違いと逆算タスク思考</div>
+      </div>
+    </div>
+    <div class="time-badge">視聴時間：約4分</div>
+    <!-- ⭐ ジャンプ案内 -->
+    <div class="jump-notice">
+      <div class="jump-notice-label">⏩ 同じ動画の別の場所に飛びます</div>
+      <div class="jump-notice-time">25:57 から再生してください</div>
+      <div class="jump-notice-note">動画の設定で「25:57」にシークしてから再生。または上の視聴ボタンから25:57部分を手動で確認してください。</div>
+    </div>
+    <div class="watch-range">
+      <div class="watch-range-label">📍 この区間を再生してください（後半）</div>
+      <div class="watch-range-time">25:57 〜 30:00</div>
+      <div class="watch-range-note">「日本のAIエージェント利用率0.02%」という数字で、今始める意味を掴みます。</div>
+    </div>
+    <div class="skip-notice">
+      <strong>⏭ 30:00以降はスキップ</strong>：内容が冗長になります。
+    </div>
+    <a class="watch-btn" href="https://www.youtube.com/watch?v=_vMi9b0XxJw&t=1557" target="_blank" rel="noopener">
+      ▶ 25:57から再生する
+    </a>
+  </div>
+
+  <!-- ⭐ Phase 6 対処事項：L3→L4 橋渡しテキスト -->
+  <div class="bridge-banner">
+    <div class="bridge-banner-label">▶ 次のレッスンへの橋渡し</div>
+    <div class="bridge-banner-text">
+      世界の動きがわかりました。日本はまだ0.02%。つまり今始めれば、確実に先行者優位を取れます。<br><br>
+      次のレッスンでは「では実際にどのツールから始めるか」を具体的に見ていきます。
+    </div>
+  </div>
+
+  <!-- チェックリスト -->
+  <div class="checklist-section">
+    <div class="checklist-title">✅ このレッスンのチェックリスト</div>
+    <label class="check-item">
+      <input type="checkbox"><div class="check-box"></div>
+      <span class="check-label">生成AIとエージェントの違いを1文で言える</span>
+    </label>
+    <label class="check-item">
+      <input type="checkbox"><div class="check-box"></div>
+      <span class="check-label">「逆算タスク思考」（目標→手順→実行）を理解した</span>
+    </label>
+    <label class="check-item">
+      <input type="checkbox"><div class="check-box"></div>
+      <span class="check-label">日本のエージェント活用が世界に比べて遅れていることを知った</span>
+    </label>
+    <label class="check-item">
+      <input type="checkbox"><div class="check-box"></div>
+      <span class="check-label">自分がどのプラットフォームで始めるか方向性が見えた</span>
+    </label>
+  </div>
+
+  <div class="complete-banner" id="completeBanner">🎉 レッスン3 完了！</div>
+  <button class="complete-btn" id="completeBtn" onclick="markComplete()">レッスン3を完了にする</button>
+  <div class="nav-row">
+    <a class="back-btn" href="lesson_02.html">← レッスン2</a>
+    <a class="next-btn" href="lesson_04.html">次へ → レッスン4 AIエージェントの道具箱</a>
+  </div>
+
+</div>
+
+<script>
+const LESSON = 3; const TOTAL = 12; const KEY = 'ai-agent-lesson-' + LESSON + '-complete';
+function updateProgress() {
+  let done = 0;
+  for (let i = 1; i <= TOTAL; i++) { if (localStorage.getItem('ai-agent-lesson-' + i + '-complete') === 'true') done++; }
+  document.getElementById('globalProgress').style.width = Math.round((done / TOTAL) * 100) + '%';
+}
+function markComplete() {
+  localStorage.setItem(KEY, 'true');
+  const btn = document.getElementById('completeBtn');
+  btn.classList.add('done'); btn.textContent = '✓ 完了済み';
+  document.getElementById('completeBanner').classList.add('show');
+  updateProgress();
+}
+document.querySelectorAll('.check-item').forEach(function(item) { item.addEventListener('click', function() { this.classList.toggle('checked'); }); });
+if (localStorage.getItem(KEY) === 'true') {
+  document.getElementById('completeBtn').classList.add('done'); document.getElementById('completeBtn').textContent = '✓ 完了済み';
+  document.getElementById('completeBanner').classList.add('show');
+}
+updateProgress();
+</script>
+</body>
+</html>

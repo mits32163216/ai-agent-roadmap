@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>レッスン1｜AIエージェントとは何か</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Hiragino Kaku Gothic ProN', 'Hiragino Sans', 'Noto Sans JP', sans-serif; background: #f5f7fa; color: #1a1a2e; line-height: 1.7; }
+
+  .lesson-banner {
+    background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+    color: white; padding: 24px 28px; position: relative; overflow: hidden;
+  }
+  .lesson-banner::before {
+    content: ''; position: absolute; top: -40px; right: -40px;
+    width: 180px; height: 180px; border-radius: 50%;
+    background: rgba(255,255,255,0.05);
+  }
+  .group-label {
+    display: inline-block; background: rgba(255,255,255,0.15);
+    color: rgba(255,255,255,0.9); font-size: 11px; font-weight: 700;
+    letter-spacing: 0.06em; padding: 4px 12px; border-radius: 20px;
+    margin-bottom: 10px; text-transform: uppercase;
+  }
+  .lesson-num { font-size: 12px; color: rgba(255,255,255,0.6); margin-bottom: 4px; }
+  .lesson-title { font-size: 20px; font-weight: 700; line-height: 1.4; margin-bottom: 8px; }
+  .lesson-sub { font-size: 13px; color: rgba(255,255,255,0.7); }
+  .progress-bar-wrap { margin-top: 16px; }
+  .progress-label { font-size: 11px; color: rgba(255,255,255,0.5); margin-bottom: 5px; }
+  .progress-bar { background: rgba(255,255,255,0.15); border-radius: 4px; height: 5px; }
+  .progress-fill { background: #e94560; height: 5px; border-radius: 4px; transition: width 0.4s; }
+
+  .container { max-width: 680px; margin: 0 auto; padding: 24px 16px 60px; }
+
+  .intro-card {
+    background: white; border-radius: 12px; padding: 20px 22px;
+    margin-bottom: 20px; border-left: 4px solid #e94560;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+  }
+  .intro-card p { font-size: 14px; color: #444; }
+  .intro-card strong { color: #e94560; }
+
+  .video-card {
+    background: white; border-radius: 12px; padding: 20px 22px;
+    margin-bottom: 16px; box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+  }
+  .video-card-header {
+    display: flex; align-items: center; gap: 10px; margin-bottom: 14px;
+  }
+  .video-icon {
+    width: 36px; height: 36px; background: #e94560; border-radius: 8px;
+    display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+  }
+  .video-icon svg { fill: white; width: 16px; height: 16px; }
+  .video-meta { flex: 1; }
+  .video-channel { font-size: 11px; color: #888; margin-bottom: 2px; }
+  .video-name { font-size: 14px; font-weight: 700; color: #1a1a2e; }
+  .time-badge {
+    display: inline-flex; align-items: center; gap: 4px;
+    background: #f0f4ff; color: #4361ee; font-size: 11px; font-weight: 600;
+    padding: 4px 10px; border-radius: 20px; margin-bottom: 12px;
+  }
+  .time-badge::before { content: '⏱'; }
+  .watch-range {
+    background: #fff8e1; border: 1px solid #ffd54f; border-radius: 8px;
+    padding: 10px 14px; margin-bottom: 14px;
+  }
+  .watch-range-label { font-size: 11px; color: #f57f17; font-weight: 700; margin-bottom: 3px; }
+  .watch-range-time { font-size: 16px; font-weight: 800; color: #e65100; font-family: 'Courier New', monospace; }
+  .watch-range-note { font-size: 12px; color: #795548; margin-top: 4px; }
+  .watch-btn {
+    display: block; width: 100%; background: #e94560;
+    color: white; text-align: center; padding: 14px; border-radius: 10px;
+    font-size: 15px; font-weight: 700; text-decoration: none;
+    transition: all 0.2s; border: none; cursor: pointer;
+  }
+  .watch-btn:hover { transform: translateY(-1px); box-shadow: 0 4px 14px rgba(233,69,96,0.4); }
+
+  .checklist-section {
+    background: white; border-radius: 12px; padding: 20px 22px;
+    margin-bottom: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+  }
+  .checklist-title {
+    font-size: 14px; font-weight: 700; color: #1a1a2e; margin-bottom: 14px;
+    padding-bottom: 10px; border-bottom: 2px solid #f0f4ff;
+  }
+  .check-item {
+    display: flex; align-items: flex-start; gap: 10px; margin-bottom: 10px;
+    cursor: pointer; padding: 8px; border-radius: 8px; transition: background 0.15s;
+  }
+  .check-item:hover { background: #f8f9ff; }
+  .check-item input[type="checkbox"] { display: none; }
+  .check-box {
+    width: 22px; height: 22px; border: 2px solid #d0d5e8; border-radius: 6px;
+    flex-shrink: 0; display: flex; align-items: center; justify-content: center;
+    transition: all 0.2s; margin-top: 1px;
+  }
+  .check-item.checked .check-box {
+    background: #4361ee; border-color: #4361ee;
+  }
+  .check-item.checked .check-box::after { content: '✓'; color: white; font-size: 13px; font-weight: 700; }
+  .check-label { font-size: 14px; color: #444; line-height: 1.5; }
+  .check-item.checked .check-label { color: #888; text-decoration: line-through; }
+
+  .complete-btn {
+    display: block; width: 100%; background: #4361ee;
+    color: white; text-align: center; padding: 16px; border-radius: 12px;
+    font-size: 16px; font-weight: 700; border: none; cursor: pointer;
+    margin-bottom: 16px; transition: all 0.2s;
+  }
+  .complete-btn:hover { transform: translateY(-1px); box-shadow: 0 5px 18px rgba(67,97,238,0.4); }
+  .complete-btn.done { background: #2dc653; }
+
+  .next-btn {
+    display: block; background: white; color: #4361ee; text-align: center;
+    padding: 14px; border-radius: 12px; font-size: 14px; font-weight: 700;
+    border: 2px solid #4361ee; text-decoration: none; transition: all 0.2s;
+  }
+  .next-btn:hover { background: #4361ee; color: white; }
+
+  .complete-banner {
+    display: none; background: #2dc653;
+    color: white; text-align: center; padding: 16px; border-radius: 12px;
+    font-size: 15px; font-weight: 700; margin-bottom: 16px;
+  }
+  .complete-banner.show { display: block; }
+</style>
+</head>
+<body>
+
+<div class="lesson-banner">
+  <div class="group-label">概念編</div>
+  <div class="lesson-num">レッスン 1 / 12</div>
+  <div class="lesson-title">AIエージェントとは何か<br>— チャットボットとの決定的な違い</div>
+  <div class="lesson-sub">「財布と睡眠を奪われる前に知っておくこと」</div>
+  <div class="progress-bar-wrap">
+    <div class="progress-label">講座全体の進捗</div>
+    <div class="progress-bar"><div class="progress-fill" id="globalProgress" style="width:0%"></div></div>
+  </div>
+</div>
+
+<div class="container">
+
+  <div class="intro-card">
+    <p>AIエージェントって聞いたことあるけど、普通のAIと何が違うの？<br>
+    このレッスンでは、<strong>「自分で動くAI」の本質</strong>を、リスクも含めてわかりやすく学びます。</p>
+  </div>
+
+  <!-- 動画カード -->
+  <div class="video-card">
+    <div class="video-card-header">
+      <div class="video-icon">
+        <svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+      </div>
+      <div class="video-meta">
+        <div class="video-channel">クウキデザイン</div>
+        <div class="video-name">AIエージェントとは？仕組みとリスクをわかりやすく解説</div>
+      </div>
+    </div>
+    <div class="time-badge">視聴時間：約11分</div>
+    <div class="watch-range">
+      <div class="watch-range-label">📍 この区間を再生してください</div>
+      <div class="watch-range-time">00:00 〜 11:00</div>
+      <div class="watch-range-note">全編が入門コンテンツとして設計されています。最初から最後まで視聴してください。</div>
+    </div>
+    <a class="watch-btn" href="https://www.youtube.com/watch?v=-v-0QAReLxg" target="_blank" rel="noopener">
+      ▶ YouTubeで視聴する
+    </a>
+  </div>
+
+  <!-- チェックリスト -->
+  <div class="checklist-section">
+    <div class="checklist-title">✅ このレッスンのチェックリスト</div>
+
+    <label class="check-item" id="ci-1-1">
+      <input type="checkbox">
+      <div class="check-box"></div>
+      <span class="check-label">AIエージェントとチャットボットの違いを自分の言葉で説明できる</span>
+    </label>
+    <label class="check-item" id="ci-1-2">
+      <input type="checkbox">
+      <div class="check-box"></div>
+      <span class="check-label">「知覚・思考・行動」の3要素を言える</span>
+    </label>
+    <label class="check-item" id="ci-1-3">
+      <input type="checkbox">
+      <div class="check-box"></div>
+      <span class="check-label">費用爆発リスク・安全性リスクを理解した</span>
+    </label>
+    <label class="check-item" id="ci-1-4">
+      <input type="checkbox">
+      <div class="check-box"></div>
+      <span class="check-label">クラウド型とローカル型の違いを説明できる</span>
+    </label>
+    <label class="check-item" id="ci-1-5">
+      <input type="checkbox">
+      <div class="check-box"></div>
+      <span class="check-label">「まず小さいタスクから始める」原則を理解した</span>
+    </label>
+  </div>
+
+  <!-- 完了ボタン -->
+  <div class="complete-banner" id="completeBanner">🎉 レッスン1 完了！</div>
+  <button class="complete-btn" id="completeBtn" onclick="markComplete()">
+    レッスン1を完了にする
+  </button>
+  <a class="next-btn" href="lesson_02.html">次へ → レッスン2「無限の部下」の世界</a>
+
+</div>
+
+<script>
+const LESSON = 1;
+const TOTAL = 12;
+const KEY = 'ai-agent-lesson-' + LESSON + '-complete';
+
+function updateProgress() {
+  let done = 0;
+  for (let i = 1; i <= TOTAL; i++) {
+    if (localStorage.getItem('ai-agent-lesson-' + i + '-complete') === 'true') done++;
+  }
+  const pct = Math.round((done / TOTAL) * 100);
+  document.getElementById('globalProgress').style.width = pct + '%';
+}
+
+function markComplete() {
+  localStorage.setItem(KEY, 'true');
+  const btn = document.getElementById('completeBtn');
+  btn.classList.add('done');
+  btn.textContent = '✓ 完了済み';
+  document.getElementById('completeBanner').classList.add('show');
+  updateProgress();
+}
+
+// チェックアイテムのクリック処理
+document.querySelectorAll('.check-item').forEach(function(item) {
+  item.addEventListener('click', function() {
+    this.classList.toggle('checked');
+  });
+});
+
+// 初期化
+if (localStorage.getItem(KEY) === 'true') {
+  const btn = document.getElementById('completeBtn');
+  btn.classList.add('done');
+  btn.textContent = '✓ 完了済み';
+  document.getElementById('completeBanner').classList.add('show');
+}
+updateProgress();
+</script>
+</body>
+</html>
