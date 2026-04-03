@@ -1,0 +1,453 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AIエージェント学習ロードマップ</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Hiragino Kaku Gothic ProN', 'Hiragino Sans', 'Noto Sans JP', sans-serif;
+    background: #f5f7fa; color: #1a1a2e; line-height: 1.7;
+  }
+
+  /* ===== HERO ===== */
+  .hero {
+    background: linear-gradient(135deg, #0a0a1a 0%, #1a1a2e 50%, #0f3460 100%);
+    color: white; padding: 40px 20px 36px; text-align: center; position: relative; overflow: hidden;
+  }
+  .hero::before {
+    content: ''; position: absolute; top: -60px; right: -60px;
+    width: 240px; height: 240px; border-radius: 50%;
+    background: rgba(99,102,241,0.12);
+  }
+  .hero::after {
+    content: ''; position: absolute; bottom: -40px; left: -40px;
+    width: 160px; height: 160px; border-radius: 50%;
+    background: rgba(233,69,96,0.08);
+  }
+  .hero-badge {
+    display: inline-block; background: rgba(99,102,241,0.25); border: 1px solid rgba(99,102,241,0.4);
+    color: rgba(255,255,255,0.9); font-size: 11px; font-weight: 700; letter-spacing: 0.06em;
+    padding: 5px 14px; border-radius: 20px; margin-bottom: 16px; text-transform: uppercase;
+  }
+  .hero-title {
+    font-size: 24px; font-weight: 800; line-height: 1.35; margin-bottom: 10px;
+    font-family: 'Hiragino Mincho ProN', 'Yu Mincho', 'Noto Serif JP', serif;
+  }
+  .hero-sub {
+    font-size: 13px; color: rgba(255,255,255,0.65); line-height: 1.7; margin-bottom: 20px;
+  }
+  .hero-progress-wrap { max-width: 480px; margin: 0 auto; }
+  .hero-progress-label {
+    display: flex; justify-content: space-between;
+    font-size: 11px; color: rgba(255,255,255,0.5); margin-bottom: 6px;
+  }
+  .hero-progress-bar { background: rgba(255,255,255,0.12); border-radius: 4px; height: 6px; }
+  .hero-progress-fill {
+    background: #6366f1;
+    height: 6px; border-radius: 4px; transition: width 0.6s ease;
+  }
+  .hero-stats {
+    display: flex; justify-content: center; gap: 24px; margin-top: 20px;
+  }
+  .hero-stat { text-align: center; }
+  .hero-stat-num { font-size: 22px; font-weight: 800; color: white; }
+  .hero-stat-label { font-size: 10px; color: rgba(255,255,255,0.5); letter-spacing: 0.08em; }
+
+  /* ===== CONTAINER ===== */
+  .container { max-width: 680px; margin: 0 auto; padding: 28px 16px 80px; }
+
+  /* ===== SECTION HEADER ===== */
+  .section-header {
+    display: flex; align-items: center; gap: 10px;
+    margin-bottom: 14px; margin-top: 28px;
+  }
+  .section-header:first-child { margin-top: 0; }
+  .section-dot {
+    width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0;
+  }
+  .section-title {
+    font-size: 13px; font-weight: 700; letter-spacing: 0.06em;
+    text-transform: uppercase; color: #888;
+  }
+  .section-line { flex: 1; height: 1px; background: #e5e7eb; }
+
+  /* ===== LESSON CARD ===== */
+  .lesson-card {
+    background: white; border-radius: 10px;
+    margin-bottom: 10px; overflow: hidden;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+    transition: box-shadow 0.2s, transform 0.15s;
+    display: block; text-decoration: none; color: inherit;
+  }
+  .lesson-card:hover {
+    box-shadow: 0 4px 16px rgba(0,0,0,0.1);
+    transform: translateY(-1px);
+  }
+  .lesson-card.completed { opacity: 0.75; }
+
+  .lesson-card-inner {
+    display: flex; align-items: stretch; gap: 0;
+  }
+  .lesson-accent {
+    width: 4px; flex-shrink: 0; border-radius: 10px 0 0 10px;
+  }
+  .lesson-body {
+    flex: 1; padding: 14px 16px 14px 14px;
+    display: flex; align-items: center; gap: 14px;
+  }
+  .lesson-num-badge {
+    width: 34px; height: 34px; border-radius: 8px; flex-shrink: 0;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 12px; font-weight: 800; color: white;
+  }
+  .lesson-info { flex: 1; min-width: 0; }
+  .lesson-group-tag {
+    font-size: 10px; font-weight: 700; letter-spacing: 0.08em;
+    text-transform: uppercase; margin-bottom: 2px;
+  }
+  .lesson-name {
+    font-size: 14px; font-weight: 700; color: #1a1a2e; line-height: 1.35;
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  }
+  .lesson-meta {
+    font-size: 11px; color: #999; margin-top: 2px;
+  }
+  .lesson-status {
+    flex-shrink: 0; width: 22px; height: 22px;
+    border-radius: 50%; border: 2px solid #e5e7eb;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .lesson-status.done {
+    background: #10b981; border-color: #10b981;
+  }
+  .lesson-status.done::after {
+    content: '✓'; color: white; font-size: 11px; font-weight: 800;
+  }
+
+  /* ===== COLORS ===== */
+  /* 概念編: navy */
+  .color-concept-accent { background: #1a1a2e; }
+  .color-concept-badge { background: #1a1a2e; }
+  .color-concept-tag { color: #4361ee; }
+  /* 体験編: amber */
+  .color-l4-accent, .color-l5-accent, .color-l6-accent { background: #d97706; }
+  .color-l4-badge, .color-l5-badge, .color-l6-badge { background: #d97706; }
+  .color-l4-tag, .color-l5-tag, .color-l6-tag { color: #d97706; }
+  /* 実践編: indigo */
+  .color-l7-accent, .color-l8-accent, .color-l9-accent { background: #4f46e5; }
+  .color-l7-badge, .color-l8-badge, .color-l9-badge { background: #4f46e5; }
+  .color-l7-tag, .color-l8-tag, .color-l9-tag { color: #4f46e5; }
+  /* 設計編: orange */
+  .color-l10-accent, .color-l11-accent, .color-l12-accent { background: #ea580c; }
+  .color-l10-badge, .color-l11-badge, .color-l12-badge { background: #ea580c; }
+  .color-l10-tag, .color-l11-tag, .color-l12-tag { color: #ea580c; }
+
+  /* ===== GOAL CARD ===== */
+  .goal-card {
+    background: linear-gradient(135deg, #0f172a, #1e3a5f);
+    border-radius: 10px; padding: 20px 22px; margin-bottom: 28px;
+    color: white;
+  }
+  .goal-card-label {
+    font-size: 10px; font-weight: 700; letter-spacing: 0.12em;
+    text-transform: uppercase; color: rgba(255,255,255,0.5); margin-bottom: 8px;
+  }
+  .goal-card-text {
+    font-size: 15px; font-weight: 700; line-height: 1.6;
+    font-family: 'Hiragino Mincho ProN', 'Yu Mincho', serif;
+  }
+  .goal-card-text em { color: #6ee7b7; font-style: normal; }
+
+  /* ===== FOOTER ===== */
+  .footer-note {
+    text-align: center; font-size: 12px; color: #aaa; padding-top: 20px; margin-top: 16px;
+    border-top: 1px solid #e5e7eb;
+  }
+
+  @media (max-width: 480px) {
+    .hero-title { font-size: 20px; }
+    .lesson-name { font-size: 13px; }
+    .hero-stats { gap: 16px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- HERO -->
+<div class="hero">
+  <div class="hero-badge">AI-Agent Roadmap</div>
+  <h1 class="hero-title">AIエージェント<br>学習ロードマップ</h1>
+  <p class="hero-sub">非エンジニア経営者がAIエージェントを<br>「使ってみたい」と思えるまでの12レッスン</p>
+  <div class="hero-progress-wrap">
+    <div class="hero-progress-label">
+      <span id="progress-text">0 / 12 完了</span>
+      <span id="progress-pct">0%</span>
+    </div>
+    <div class="hero-progress-bar">
+      <div class="hero-progress-fill" id="hero-progress-fill" style="width:0%"></div>
+    </div>
+  </div>
+  <div class="hero-stats">
+    <div class="hero-stat">
+      <div class="hero-stat-num">12</div>
+      <div class="hero-stat-label">LESSONS</div>
+    </div>
+    <div class="hero-stat">
+      <div class="hero-stat-num" id="stat-done">0</div>
+      <div class="hero-stat-label">COMPLETED</div>
+    </div>
+    <div class="hero-stat">
+      <div class="hero-stat-num">約3h</div>
+      <div class="hero-stat-label">TOTAL</div>
+    </div>
+  </div>
+</div>
+
+<div class="container">
+
+  <!-- GOAL CARD -->
+  <div class="goal-card">
+    <div class="goal-card-label">このロードマップのゴール</div>
+    <div class="goal-card-text">
+      AIエージェントという言葉を聞いたとき<br>
+      <em>「使ってみたい」「やってみたい」</em>と思える状態になること
+    </div>
+  </div>
+
+  <!-- 概念編 -->
+  <div class="section-header">
+    <div class="section-dot" style="background:#4361ee;"></div>
+    <div class="section-title">概念編 — まず世界観をつかむ</div>
+    <div class="section-line"></div>
+  </div>
+
+  <a class="lesson-card" id="card-1" href="lesson_01.html">
+    <div class="lesson-card-inner">
+      <div class="lesson-accent color-concept-accent"></div>
+      <div class="lesson-body">
+        <div class="lesson-num-badge color-concept-badge">01</div>
+        <div class="lesson-info">
+          <div class="lesson-group-tag color-concept-tag">概念編</div>
+          <div class="lesson-name">AIエージェントとは何か</div>
+          <div class="lesson-meta">クウキデザイン · 約11分</div>
+        </div>
+        <div class="lesson-status" id="status-1"></div>
+      </div>
+    </div>
+  </a>
+
+  <a class="lesson-card" id="card-2" href="lesson_02.html">
+    <div class="lesson-card-inner">
+      <div class="lesson-accent color-concept-accent"></div>
+      <div class="lesson-body">
+        <div class="lesson-num-badge color-concept-badge">02</div>
+        <div class="lesson-info">
+          <div class="lesson-group-tag color-concept-tag">概念編</div>
+          <div class="lesson-name">無限の部下の世界</div>
+          <div class="lesson-meta">NewsPicks · 約10分</div>
+        </div>
+        <div class="lesson-status" id="status-2"></div>
+      </div>
+    </div>
+  </a>
+
+  <a class="lesson-card" id="card-3" href="lesson_03.html">
+    <div class="lesson-card-inner">
+      <div class="lesson-accent color-concept-accent"></div>
+      <div class="lesson-body">
+        <div class="lesson-num-badge color-concept-badge">03</div>
+        <div class="lesson-info">
+          <div class="lesson-group-tag color-concept-tag">概念編</div>
+          <div class="lesson-name">世界はどう動いているか</div>
+          <div class="lesson-meta">エルアボ · 約9分（2区間）</div>
+        </div>
+        <div class="lesson-status" id="status-3"></div>
+      </div>
+    </div>
+  </a>
+
+  <!-- 体験編 -->
+  <div class="section-header">
+    <div class="section-dot" style="background:#f59e0b;"></div>
+    <div class="section-title">体験編 — 実際に触れてみる</div>
+    <div class="section-line"></div>
+  </div>
+
+  <a class="lesson-card" id="card-4" href="lesson_04.html">
+    <div class="lesson-card-inner">
+      <div class="lesson-accent color-l4-accent"></div>
+      <div class="lesson-body">
+        <div class="lesson-num-badge color-l4-badge">04</div>
+        <div class="lesson-info">
+          <div class="lesson-group-tag color-l4-tag">体験編</div>
+          <div class="lesson-name">AIエージェントの道具箱</div>
+          <div class="lesson-meta">AIでサボろうch / 建設業 · 約14分</div>
+        </div>
+        <div class="lesson-status" id="status-4"></div>
+      </div>
+    </div>
+  </a>
+
+  <a class="lesson-card" id="card-5" href="lesson_05.html">
+    <div class="lesson-card-inner">
+      <div class="lesson-accent color-l5-accent"></div>
+      <div class="lesson-body">
+        <div class="lesson-num-badge color-l5-badge">05</div>
+        <div class="lesson-info">
+          <div class="lesson-group-tag color-l5-tag">体験編</div>
+          <div class="lesson-name">はじめてのサブエージェント</div>
+          <div class="lesson-meta">IMURA · 約16分</div>
+        </div>
+        <div class="lesson-status" id="status-5"></div>
+      </div>
+    </div>
+  </a>
+
+  <a class="lesson-card" id="card-6" href="lesson_06.html">
+    <div class="lesson-card-inner">
+      <div class="lesson-accent color-l6-accent"></div>
+      <div class="lesson-body">
+        <div class="lesson-num-badge color-l6-badge">06</div>
+        <div class="lesson-info">
+          <div class="lesson-group-tag color-l6-tag">体験編</div>
+          <div class="lesson-name">外部ツール連携 — MCPとスキル</div>
+          <div class="lesson-meta">POST HUMAN · 約3分</div>
+        </div>
+        <div class="lesson-status" id="status-6"></div>
+      </div>
+    </div>
+  </a>
+
+  <!-- 実践編 -->
+  <div class="section-header">
+    <div class="section-dot" style="background:#4f46e5;"></div>
+    <div class="section-title">実践編 — チームで動かす</div>
+    <div class="section-line"></div>
+  </div>
+
+  <a class="lesson-card" id="card-7" href="lesson_07.html">
+    <div class="lesson-card-inner">
+      <div class="lesson-accent color-l7-accent"></div>
+      <div class="lesson-body">
+        <div class="lesson-num-badge color-l7-badge">07</div>
+        <div class="lesson-info">
+          <div class="lesson-group-tag color-l7-tag">実践編</div>
+          <div class="lesson-name">Agent Teamsの仕組み</div>
+          <div class="lesson-meta">Sura×Asura · 約5分（2区間）</div>
+        </div>
+        <div class="lesson-status" id="status-7"></div>
+      </div>
+    </div>
+  </a>
+
+  <a class="lesson-card" id="card-8" href="lesson_08.html">
+    <div class="lesson-card-inner">
+      <div class="lesson-accent color-l8-accent"></div>
+      <div class="lesson-body">
+        <div class="lesson-num-badge color-l8-badge">08</div>
+        <div class="lesson-info">
+          <div class="lesson-group-tag color-l8-tag">実践編</div>
+          <div class="lesson-name">ハーネスとプラグイン</div>
+          <div class="lesson-meta">まさおAI · 約8分</div>
+        </div>
+        <div class="lesson-status" id="status-8"></div>
+      </div>
+    </div>
+  </a>
+
+  <a class="lesson-card" id="card-9" href="lesson_09.html">
+    <div class="lesson-card-inner">
+      <div class="lesson-accent color-l9-accent"></div>
+      <div class="lesson-body">
+        <div class="lesson-num-badge color-l9-badge">09</div>
+        <div class="lesson-info">
+          <div class="lesson-group-tag color-l9-tag">実践編</div>
+          <div class="lesson-name">Computer Use</div>
+          <div class="lesson-meta">Ava Does AI / いけともch · 約22分</div>
+        </div>
+        <div class="lesson-status" id="status-9"></div>
+      </div>
+    </div>
+  </a>
+
+  <!-- 設計編 -->
+  <div class="section-header">
+    <div class="section-dot" style="background:#ea580c;"></div>
+    <div class="section-title">設計編 — ビジネスに組み込む</div>
+    <div class="section-line"></div>
+  </div>
+
+  <a class="lesson-card" id="card-10" href="lesson_10.html">
+    <div class="lesson-card-inner">
+      <div class="lesson-accent color-l10-accent"></div>
+      <div class="lesson-body">
+        <div class="lesson-num-badge color-l10-badge">10</div>
+        <div class="lesson-info">
+          <div class="lesson-group-tag color-l10-tag">設計編</div>
+          <div class="lesson-name">AIをビジネスに入れる下地</div>
+          <div class="lesson-meta">キャスター / いけともch · 約15分</div>
+        </div>
+        <div class="lesson-status" id="status-10"></div>
+      </div>
+    </div>
+  </a>
+
+  <a class="lesson-card" id="card-11" href="lesson_11.html">
+    <div class="lesson-card-inner">
+      <div class="lesson-accent color-l11-accent"></div>
+      <div class="lesson-body">
+        <div class="lesson-num-badge color-l11-badge">11</div>
+        <div class="lesson-info">
+          <div class="lesson-group-tag color-l11-tag">設計編</div>
+          <div class="lesson-name">AIマーケティングチームを作る</div>
+          <div class="lesson-meta">AIでサボろうch · 約8分</div>
+        </div>
+        <div class="lesson-status" id="status-11"></div>
+      </div>
+    </div>
+  </a>
+
+  <a class="lesson-card" id="card-12" href="lesson_12.html">
+    <div class="lesson-card-inner">
+      <div class="lesson-accent color-l12-accent"></div>
+      <div class="lesson-body">
+        <div class="lesson-num-badge color-l12-badge">12</div>
+        <div class="lesson-info">
+          <div class="lesson-group-tag color-l12-tag">設計編</div>
+          <div class="lesson-name">あなたのAIエージェント設計図</div>
+          <div class="lesson-meta">松田先生 · 約5分（2区間）</div>
+        </div>
+        <div class="lesson-status" id="status-12"></div>
+      </div>
+    </div>
+  </a>
+
+  <div class="footer-note">
+    AIエージェント学習ロードマップ &copy; 2026 · Powered by Claude Cowork
+  </div>
+</div>
+
+<script>
+  // 進捗バー：localStorage から各レッスンの完了状態を取得
+  const total = 12;
+  let done = 0;
+  for (let i = 1; i <= total; i++) {
+    const key = 'ai-agent-lesson-' + i + '-complete';
+    if (localStorage.getItem(key) === 'true') {
+      done++;
+      const card = document.getElementById('card-' + i);
+      const status = document.getElementById('status-' + i);
+      if (card) card.classList.add('completed');
+      if (status) status.classList.add('done');
+    }
+  }
+  const pct = Math.round((done / total) * 100);
+  document.getElementById('progress-text').textContent = done + ' / ' + total + ' 完了';
+  document.getElementById('progress-pct').textContent = pct + '%';
+  document.getElementById('hero-progress-fill').style.width = pct + '%';
+  document.getElementById('stat-done').textContent = done;
+</script>
+</body>
+</html>
